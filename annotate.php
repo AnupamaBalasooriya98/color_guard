@@ -1,6 +1,6 @@
 <html>
 <head>
-    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="icon" type="image/png" href="img/AppLogo.png">
     <title>Annotation results</title>
     <style>
         .color-block {

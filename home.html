@@ -3,15 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="img/logo.png">
+
+    <!-- Favicon (Logo in Browser Tab) -->
+    <link rel="icon" type="image/png" href="img/AppLogo.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+
     <title>Color Guard</title>
 </head>
-    <body>
-        <h1>Upload Screenshot for Annotation</h1>
-        <form action="annotate.php" method="post" enctype="multipart/form-data">
-            <label for="screenshot">Upload Screenshot:</label>
-            <input type="file" name="screenshot" id="screenshot" accept="image/*" required>
-            <button type="submit">Annotate</button>
-        </form>
-    </body>
+<body class="bg-light">
+
+    <!-- Container for Logo and Title -->
+    <div class="container mt-5 text-center">
+        <img src="img/AppLogo.png" alt="Logo" class="img-fluid mb-3" style="height: 200px;">
+        <h1 class="display-4">Color Guard</h1>
+    </div>
+
+    <!-- Form Section -->
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-center mb-4">Upload Screenshot for Annotation</h5>
+                        <form action="annotate.php" method="post" enctype="multipart/form-data">
+                            <div class="form-group mb-3">
+                                <label for="screenshot" class="form-label">Upload Screenshot:</label>
+                                <input type="file" class="form-control" name="screenshot" id="screenshot" accept="image/*" required>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="reset" class="btn btn-secondary me-2 w-50">Reset</button>
+                                <button type="submit" class="btn btn-primary w-50">Annotate</button>
+                            </div>                            
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
