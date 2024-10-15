@@ -1,6 +1,7 @@
 <html>
 <head>
     <link rel="icon" type="image/png" href="img/AppLogo.png">
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <title>Annotation results</title>
     <style>
         .color-block {
@@ -35,82 +36,105 @@
         }
     </style>
 </head>
-<body>
-    <?php
-        function delete_all($folder_path) {
-            $files = glob($folder_path . '/*');
-            foreach ($files as $file) {
-                if (is_dir($file)) {
-                    delete_all($file);
-                    rmdir($file);
-                } else {
-                    unlink($file);
-                }
-            }
-        }
+<body class="bg-light">
 
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['screenshot'])) {
-            delete_all("uploads");
-            $target_dir = "uploads/";
-            $target_file = $target_dir . basename($_FILES["screenshot"]["name"]);
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-3">Annotation Results</h2>
+                            <?php
+                                function delete_all($folder_path) {
+                                    $files = glob($folder_path . '/*');
+                                    foreach ($files as $file) {
+                                        if (is_dir($file)) {
+                                            delete_all($file);
+                                            rmdir($file);
+                                        } else {
+                                            unlink($file);
+                                        }
+                                    }
+                                }
 
-            if (move_uploaded_file($_FILES["screenshot"]["tmp_name"], $target_file)) {
-                $python_path = 'C:\\Users\\Anupama\\AppData\\Local\\Programs\\Python\\Python312\\python.exe';
-                $escaped_target_file = escapeshellarg($target_file);
+                                if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['screenshot'])) {
+                                    delete_all("uploads");
+                                    $target_dir = "uploads/";
+                                    $target_file = $target_dir . basename($_FILES["screenshot"]["name"]);
 
-                // Run the Python annotation script to extract primary and secondary colors
-                $command = escapeshellcmd("$python_path annotate_image.py $escaped_target_file");
-                exec($command . ' 2>&1', $output, $result_code);
+                                    if (move_uploaded_file($_FILES["screenshot"]["tmp_name"], $target_file)) {
+                                        $python_path = 'C:\\Users\\Anupama\\AppData\\Local\\Programs\\Python\\Python312\\python.exe';
+                                        $escaped_target_file = escapeshellarg($target_file);
 
-                if ($result_code === 0) {
-                    $primary_color = trim($output[0] ?? "#000000");
-                    $secondary_color = trim($output[1] ?? "#FFFFFF");
+                                        // Run the Python annotation script to extract primary and secondary colors
+                                        $command = escapeshellcmd("$python_path annotate_image.py $escaped_target_file");
+                                        exec($command . ' 2>&1', $output, $result_code);
 
-                    // Display primary and secondary colors
-                    echo "<h2>Primary and Secondary Colors</h2>";
-                    echo "<div class='color-container'>";
-                    echo "<div class='color-block' style='background-color: " . htmlspecialchars($primary_color) . ";'></div>";
-                    echo "<p><strong>Primary Color:</strong> " . htmlspecialchars($primary_color) . "</p>";
-                    echo "<div class='color-block' style='background-color: " . htmlspecialchars($secondary_color) . ";'></div>";
-                    echo "<p><strong>Secondary Color:</strong> " . htmlspecialchars($secondary_color) . "</p>";
-                    echo "</div>";
+                                        if ($result_code === 0) {
+                                            $primary_color = trim($output[0] ?? "#000000");
+                                            $secondary_color = trim($output[1] ?? "#FFFFFF");
 
-                    // Display the whole annotated image
-                    echo "<h2>Annotated Image</h2>";
-                    echo "<img src='uploads/annotated_image.jpg' alt='Annotated Image' class='annotated-image'>";
+                                            // Display primary and secondary colors
+                                            echo "<h4>Primary and Secondary Colors</h4>";
+                                            echo "<div class='row text-center mt-3'>";
+                                            echo "  <div class='col-md-6'>";
+                                            echo "      <div class='p-3' style='background-color: " . htmlspecialchars($primary_color) . "; height: 100px; border-radius: 10px;'></div>";
+                                            echo "      <p class='mt-2'><strong>Primary Color:</strong> " . htmlspecialchars($primary_color) . "</p>";
+                                            echo "  </div>";
+                                            echo "  <div class='col-md-6'>";
+                                            echo "      <div class='p-3' style='background-color: " . htmlspecialchars($secondary_color) . "; height: 100px; border-radius: 10px;'></div>";
+                                            echo "      <p class='mt-2'><strong>Secondary Color:</strong> " . htmlspecialchars($secondary_color) . "</p>";
+                                            echo "  </div>";
+                                            echo "</div>";
 
-                    // Run the generate_tips.py script with extracted colors
-                    $generate_tips_command = escapeshellcmd("$python_path generate_tips.py uploads/element_data.json $primary_color $secondary_color");
-                    exec($generate_tips_command, $tips_output, $tips_status);
+                                            // Display the whole annotated image
+                                            echo "<div class='position-relative'>";
+                                            echo "<h4>Annotated Image</h4>";
+                                            echo "<img src='uploads/annotated_image.jpg' alt='Uploaded Screenshot' style='max-width: 40%; height: auto;' class='annotated-image border'>";
+                                            echo "</div>";
 
-                    if ($tips_status === 0) {
-                        $tips_json = file_get_contents('uploads/ui_tips.json');
-                        $tips_data = json_decode($tips_json, true);
+                                            // Run the generate_tips.py script with extracted colors
+                                            $generate_tips_command = escapeshellcmd("$python_path generate_tips.py uploads/element_data.json $primary_color $secondary_color");
+                                            exec($generate_tips_command, $tips_output, $tips_status);
 
-                        echo "<h2>Annotated Elements with Improvement Tips</h2>";
-                        foreach ($tips_data as $index => $tip) {
-                            $cropped_image_path = "uploads/cropped_element_" . ($index + 1) . ".jpg";
-                            echo "<div class='element-container'>";
-                            echo "<img src='" . htmlspecialchars($cropped_image_path) . "' alt='Element'>";
-                            echo "<div class='element-details'>";
-                            echo "<p><strong>Element:</strong> " . htmlspecialchars($tip['element_type']) . "</p>";
-                            echo "<p><strong>Color:</strong> " . htmlspecialchars($tip['color']) . "</p>";
-                            echo "<p><strong>Tip:</strong> " . htmlspecialchars($tip['tip']) . "</p>";
-                            echo "</div>";
-                            echo "</div>";
-                        }
-                    } else {
-                        echo "<p>Error generating UI improvement tips.</p>";
-                    }
-                } else {
-                    echo "<p>Failed to annotate the image. Please try again.</p>";
-                }
-            } else {
-                echo "<p>Error uploading the file.</p>";
-            }
-        } else {
-            echo "<p>No file uploaded. Please try again.</p>";
-        }
-    ?>
+                                            if ($tips_status === 0) {
+                                                $tips_json = file_get_contents('uploads/ui_tips.json');
+                                                $tips_data = json_decode($tips_json, true);
+
+                                                echo "<div class='col-md-4'>";
+                                                echo "<h4>Annotated Elements with Improvement Tips</h4>";
+                                                foreach ($tips_data as $index => $tip) {
+                                                    $cropped_image_path = "uploads/cropped_element_" . ($index + 1) . ".jpg";
+                                                    echo "<div class='element-container'>";
+                                                    echo "<img src='" . htmlspecialchars($cropped_image_path) . "' alt='Element'>";
+                                                    echo "<div class='element-details'>";
+                                                    echo "<p><strong>Element:</strong> " . htmlspecialchars($tip['element_type']) . "</p>";
+                                                    echo "<p><strong>Color:</strong> " . htmlspecialchars($tip['color']) . "</p>";
+                                                    echo "<p><strong>Tip:</strong> " . htmlspecialchars($tip['tip']) . "</p>";
+                                                    echo "</div>";
+                                                    echo "</div>";
+                                                }
+                                                echo "</div>";
+                                            } else {
+                                                echo "<p>Error generating UI improvement tips.</p>";
+                                            }
+                                        } else {
+                                            echo "<p>Failed to annotate the image. Please try again.</p>";
+                                        }
+                                    } else {
+                                        echo "<p>Error uploading the file.</p>";
+                                    }
+                                } else {
+                                    echo "<p>No file uploaded. Please try again.</p>";
+                                }
+                            ?>
+                            <div class="mt-4 text-center">
+                            <a href="home.html" class="btn btn-primary">Go Back</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
