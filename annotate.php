@@ -40,7 +40,7 @@
 
     <div class="container mt-5">
         <div class="row justify-content-center">
-            <div class="col-md-10">
+            <div class="col-md-11">
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h2 class="card-title text-center mb-3">Annotation Results</h2>
@@ -88,9 +88,11 @@
                                             echo "</div>";
 
                                             // Display the whole annotated image
-                                            echo "<div class='position-relative'>";
+                                            echo "<div class='container mt-5'>";
+                                            echo "<div class='row'>";
+                                            echo "<div class='col-md-5'>";
                                             echo "<h4>Annotated Image</h4>";
-                                            echo "<img src='uploads/annotated_image.jpg' alt='Uploaded Screenshot' style='max-width: 40%; height: auto;' class='annotated-image border'>";
+                                            echo "<img src='uploads/annotated_image.jpg' alt='Uploaded Screenshot' style='max-width: 100%; height: auto;' class='annotated-image border'>";
                                             echo "</div>";
 
                                             // Run the generate_tips.py script with extracted colors
@@ -101,7 +103,7 @@
                                                 $tips_json = file_get_contents('uploads/ui_tips.json');
                                                 $tips_data = json_decode($tips_json, true);
 
-                                                echo "<div class='col-md-4'>";
+                                                echo "<div class='col-md-7'>";
                                                 echo "<h4>Annotated Elements with Improvement Tips</h4>";
                                                 foreach ($tips_data as $index => $tip) {
                                                     $cropped_image_path = "uploads/cropped_element_" . ($index + 1) . ".jpg";
@@ -114,6 +116,8 @@
                                                     echo "</div>";
                                                     echo "</div>";
                                                 }
+                                                echo "</div>";
+                                                echo "</div>";
                                                 echo "</div>";
                                             } else {
                                                 echo "<p>Error generating UI improvement tips.</p>";
