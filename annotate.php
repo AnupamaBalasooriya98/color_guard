@@ -104,7 +104,7 @@
                                                 $tips_data = json_decode($tips_json, true);
 
                                                 echo "<div class='col-md-7'>";
-                                                echo "<h4>Annotated Elements with Improvement Tips</h4>";
+                                                echo "<h4>Annotated Elements with Violated Guidelines and Improvement Tips</h4>";
                                                 foreach ($tips_data as $index => $tip) {
                                                     $cropped_image_path = "uploads/cropped_element_" . ($index + 1) . ".jpg";
                                                     echo "<div class='element-container'>";
@@ -112,6 +112,13 @@
                                                     echo "<div class='element-details'>";
                                                     echo "<p><strong>Element:</strong> " . htmlspecialchars($tip['element_type']) . "</p>";
                                                     echo "<p><strong>Color:</strong> " . htmlspecialchars($tip['color']) . "</p>";
+
+                                                    // Display violated guideline, if any
+                                                    if (isset($tip['violated_guideline']) && $tip['violated_guideline']) {
+                                                        echo "<p><strong>Violated Guideline:</strong> " . htmlspecialchars($tip['violated_guideline']) . "</p>";
+                                                    }
+
+                                                    // Display the tip
                                                     echo "<p><strong>Tip:</strong> " . htmlspecialchars($tip['tip']) . "</p>";
                                                     echo "</div>";
                                                     echo "</div>";
