@@ -23,19 +23,12 @@ def generate_ui_tips(element_data, primary_color_hex, secondary_color_hex):
     primary_color = hex_to_rgb(primary_color_hex)
     secondary_color = hex_to_rgb(secondary_color_hex)
 
+    # Define guidelines for elements
     guidelines = {
         'TOP APP BAR': [primary_color],
         'BOTTOM APP BAR': [primary_color],
-        'BACKDROP_BACK': [primary_color],
-        'BACKDROP_FRONT': [(255, 255, 255)],
-        'SHEET_SURFACE': [(255, 255, 255)],
-        'MODAL_SHEET': [(255, 255, 255), primary_color, secondary_color],
-        'CARD': [(255, 255, 255)],
         'BUTTON': [primary_color],
-        'RADIO_BUTTON': [(255, 255, 255)],
-        'CHECK_BOX': [(255, 255, 255)],
         'FAB': [secondary_color],
-        'SELECTION_CONTROL': [secondary_color],
         'ICON': [primary_color],
         'TEXT_INPUT': [secondary_color],
         'LABEL': [primary_color]
@@ -47,23 +40,31 @@ def generate_ui_tips(element_data, primary_color_hex, secondary_color_hex):
         element_color_hex = element['color']
         element_color = hex_to_rgb(element_color_hex)
 
+        # Get the expected colors for this element from the guidelines
         expected_colors = guidelines.get(element_type.upper(), [])
 
+        violated_guideline = None
         if expected_colors:
-            if element_color in expected_colors:
-                tip = f"The {element_type} color is as per guidelines."
-            else:
+            if element_color not in expected_colors:
+                # If the element color doesn't match the guideline, it's a violation
                 expected_colors_hex = [rgb_to_hex(c) for c in expected_colors]
-                tip = (f"The {element_type} color {element_color_hex} does not match the guideline colors "
-                       f"{', '.join(expected_colors_hex)}. Consider updating it.")
-        else:
-            tip = f"No guidelines available for {element_type}. Consider reviewing its color."
+                violated_guideline = (f"Guideline Violated: The {element_type} color should be one of "
+                                      f"{', '.join(expected_colors_hex)}.")
 
+        # Generate a tip based on whether there's a violation
+        if violated_guideline:
+            tip = f"The {element_type} color {element_color_hex} does not match the guideline colors."
+        else:
+            tip = f"The {element_type} color is as per guidelines."
+
+        # Append both violated guideline and tip
         tips.append({
             'element_type': element_type,
             'color': element_color_hex,
+            'violated_guideline': violated_guideline,
             'tip': tip
         })
+
     return tips
 
 def main():

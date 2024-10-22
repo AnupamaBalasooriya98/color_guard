@@ -9,27 +9,41 @@ from colorthief import ColorThief
 def rgb_to_hex(color):
     return "#{:02x}{:02x}{:02x}".format(color[0], color[1], color[2])
 
-# Get primary and secondary colors for the entire image
+# Check if color is close to white
+def is_near_white(color, threshold=240):
+    return all(c >= threshold for c in color)
+
 def find_primary_and_secondary_colors(image_path):
     if not os.path.exists(image_path):
         print(f"File not found: {image_path}")
         return None, None
 
     ct = ColorThief(image_path)
+    
+    # Get a larger palette of colors (12 colors)
+    palette = ct.get_palette(color_count=12, quality=1)
 
-    # Get a larger palette of colors (5 colors) to analyze
-    palette = ct.get_palette(color_count=5, quality=1)
+    # Sort colors by their perceived brightness to avoid inversion issues
+    palette.sort(key=lambda c: sum(c) / 3)  # Sort by average RGB value (brightness)
 
-    # Filter out very dark colors (where R, G, and B are all < 30)
-    filtered_palette = [color for color in palette if not (color[0] < 30 and color[1] < 30 and color[2] < 30)]
+    # Filter out colors that are too dark
+    filtered_palette = [color for color in palette if sum(color) / 3 > 30]  # Ignore very dark colors
 
-    if filtered_palette:
-        primary_color = filtered_palette[0]
-        secondary_color = filtered_palette[1] if len(filtered_palette) > 1 else None
+    # Check for white or near-white primary color
+    primary_color = None
+    secondary_color = None
+
+    for color in filtered_palette:
+        if is_near_white(color):
+            primary_color = (255, 255, 255)  # Force white if it's near-white
+            break
     else:
-        # Fallback: Use the original dark colors if filtering leaves nothing
-        primary_color = palette[0]
-        secondary_color = palette[1] if len(palette) > 1 else None
+        # Choose the brightest color if no white is found
+        primary_color = filtered_palette[-1]
+
+    # Assign secondary color (next color in palette)
+    if len(filtered_palette) > 1:
+        secondary_color = filtered_palette[-1] if primary_color != filtered_palette[-1] else filtered_palette[-2]
 
     return primary_color, secondary_color
 
