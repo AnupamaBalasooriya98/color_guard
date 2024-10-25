@@ -2,32 +2,29 @@
 <head>
     <link rel="icon" type="image/png" href="img/AppLogo.png">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
-    <title>Annotation results</title>
+    <title>Annotation Results</title>
     <style>
-        .color-block {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            margin-right: 10px;
-            border: 1px solid #000;
-        }
         .color-container {
             margin-bottom: 20px;
         }
+
         .element-container {
             margin-bottom: 20px;
             display: flex;
             align-items: center;
         }
+
         .element-container img {
             width: 100px;
             height: auto;
             margin-right: 10px;
         }
+
         .element-details {
             display: inline-block;
             vertical-align: top;
         }
+
         .annotated-image {
             max-width: 80%; 
             height: auto; 
