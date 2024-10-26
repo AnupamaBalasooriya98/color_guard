@@ -13,40 +13,14 @@ def rgb_to_hex(color):
     return "#{:02x}{:02x}{:02x}".format(color[0], color[1], color[2])
 
 
-# Convert RGB to HSV and return brightness, hue, and saturation
-def rgb_to_hsv(rgb):
-    return colorsys.rgb_to_hsv(rgb[0] / 255.0, rgb[1] / 255.0, rgb[2] / 255.0)
-
-
-def filter_palette(palette):
-    """Filter out near-white and low-saturation colors."""
-    filtered = []
-    for color in palette:
-        h, s, v = rgb_to_hsv(color)
-        if v < 0.95 and s > 0.2:  # Ignore near-white and pale colors
-            filtered.append(color)
-    return filtered
-
-
 def find_primary_and_secondary_colors(image_path):
     ct = ColorThief(image_path)
 
-    # Extract a high-quality palette
-    palette = ct.get_palette(color_count=12, quality=5)
+    # dominant_colors = ct.get_color(quality = 1)
 
-    # Filter out irrelevant colors (near-white, low-saturation)
-    filtered_palette = filter_palette(palette)
+    palette = ct.get_palette(color_count = 2)
 
-    if not filtered_palette:
-        return (255, 255, 255), (0, 0, 0)  # Fallback to white and black
-
-    # Sort by brightness (descending)
-    filtered_palette.sort(key=lambda c: rgb_to_hsv(c)[2], reverse=True)
-
-    primary_color = filtered_palette[0]
-    secondary_color = filtered_palette[1] if len(filtered_palette) > 1 else (0, 0, 0)
-
-    return primary_color, secondary_color
+    return palette[0], palette[1]
 
 
 def dominant_color_of_element(cropped_image):
