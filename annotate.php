@@ -4,27 +4,32 @@
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <title>Annotation Results</title>
     <style>
+        .color-circle {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+            border: 1px solid #000;
+            vertical-align: middle;
+        }
         .color-container {
             margin-bottom: 20px;
         }
-
         .element-container {
             margin-bottom: 20px;
             display: flex;
             align-items: center;
         }
-
         .element-container img {
             width: 100px;
             height: auto;
             margin-right: 10px;
         }
-
         .element-details {
             display: inline-block;
             vertical-align: top;
         }
-
         .annotated-image {
             max-width: 80%;
             height: auto;
@@ -72,16 +77,16 @@
                                 $primary_color = trim($output[0] ?? "#000000");
                                 $secondary_color = trim($output[1] ?? "#FFFFFF");
 
-                                // Display primary and secondary colors
+                                // Display primary and secondary colors with color names
                                 echo "<h4>Primary and Secondary Colors</h4>";
                                 echo "<div class='row text-center mt-3'>";
                                 echo "  <div class='col-md-6'>";
                                 echo "      <div class='p-3' style='background-color: " . htmlspecialchars($primary_color) . "; height: 100px; border-radius: 10px;'></div>";
-                                echo "      <p class='mt-2'><strong>Primary Color:</strong> " . htmlspecialchars($primary_color) . "</p>";
+                                echo "      <p class='mt-2'><strong>Primary Color:</strong> " . htmlspecialchars($primary_color) . "<span class='color-circle' style='background-color: " . htmlspecialchars($primary_color) . ";'></span></p>";
                                 echo "  </div>";
                                 echo "  <div class='col-md-6'>";
                                 echo "      <div class='p-3' style='background-color: " . htmlspecialchars($secondary_color) . "; height: 100px; border-radius: 10px;'></div>";
-                                echo "      <p class='mt-2'><strong>Secondary Color:</strong> " . htmlspecialchars($secondary_color) . "</p>";
+                                echo "      <p class='mt-2'><strong>Secondary Color:</strong> " . htmlspecialchars($secondary_color) . "<span class='color-circle' style='background-color: " . htmlspecialchars($secondary_color) . ";'></span></p>";
                                 echo "  </div>";
                                 echo "</div>";
 
@@ -109,7 +114,7 @@
                                         echo "<img src='" . htmlspecialchars($cropped_image_path) . "' alt='Element'>";
                                         echo "<div class='element-details'>";
                                         echo "<p><strong>Element:</strong> " . htmlspecialchars($tip['element_type']) . "</p>";
-                                        echo "<p><strong>Color:</strong> " . htmlspecialchars($tip['color']) . "</p>";
+                                        echo "<p><strong>Color:</strong> " . htmlspecialchars($tip['color']) . "<span class='color-circle' style='background-color: " . htmlspecialchars($tip['color']) . ";'></span></p>";
 
                                         // Display violated guideline, if any
                                         if (isset($tip['violated_guideline']) && $tip['violated_guideline']) {
