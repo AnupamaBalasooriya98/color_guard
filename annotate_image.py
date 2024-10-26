@@ -15,11 +15,7 @@ def rgb_to_hex(color):
 
 def find_primary_and_secondary_colors(image_path):
     ct = ColorThief(image_path)
-
-    # dominant_colors = ct.get_color(quality = 1)
-
     palette = ct.get_palette(color_count = 2)
-
     return palette[0], palette[1]
 
 

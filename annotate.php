@@ -1,4 +1,4 @@
-<html>
+<html lang="en">
 <head>
     <link rel="icon" type="image/png" href="img/AppLogo.png">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
