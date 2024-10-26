@@ -18,7 +18,6 @@ def find_primary_and_secondary_colors(image_path):
     palette = ct.get_palette(color_count = 2)
     return palette[0], palette[1]
 
-
 def dominant_color_of_element(cropped_image):
     if cropped_image is None or cropped_image.size == 0:
         print("Empty or invalid cropped image, skipping color extraction.")
@@ -33,8 +32,8 @@ def dominant_color_of_element(cropped_image):
 
         try:
             ct = ColorThief(temp_filename)
-            element_color = ct.get_color(quality=1)
-            return element_color
+            palette = ct.get_palette(color_count = 2)
+            return palette[0]
         except Exception as e:
             print(f"Error extracting color: {e}")
             return None
