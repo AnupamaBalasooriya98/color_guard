@@ -3,15 +3,13 @@ import json
 import os
 import sys
 import tempfile
-
 import cv2
 from colorthief import ColorThief
-
+import webcolors
 
 # Convert RGB tuple to hexadecimal color
 def rgb_to_hex(color):
     return "#{:02x}{:02x}{:02x}".format(color[0], color[1], color[2])
-
 
 def find_primary_and_secondary_colors(image_path):
     ct = ColorThief(image_path)
@@ -38,7 +36,6 @@ def dominant_color_of_element(cropped_image):
             print(f"Error extracting color: {e}")
             return None
 
-
 def classify_element(contour, image_shape):
     x, y, w, h = cv2.boundingRect(contour)
     aspect_ratio = w / float(h)
@@ -55,7 +52,30 @@ def classify_element(contour, image_shape):
         return "Label"
     else:
         return "Unknown"
+    
+# Get the closest color name using the webcolors library
+def get_color_name(hex_color):
+    try:
+        # Convert hex to RGB
+        rgb_color = webcolors.hex_to_rgb(hex_color)
+        # Try to get the exact color name
+        color_name = webcolors.rgb_to_name(rgb_color)
+    except ValueError:
+        # If there's no exact match, get the closest color name
+        color_name = get_closest_color_name(rgb_color)
+    
+    return color_name
 
+# Function to get the closest named color
+def get_closest_color_name(requested_color):
+    min_colors = {}
+    for key, name in webcolors.CSS3_HEX_TO_NAMES.items():
+        r_c, g_c, b_c = webcolors.hex_to_rgb(key)
+        rd = (r_c - requested_color.red) ** 2
+        gd = (g_c - requested_color.green) ** 2
+        bd = (b_c - requested_color.blue) ** 2
+        min_colors[(rd + gd + bd)] = name
+    return min_colors[min(min_colors.keys())]
 
 def detect_clickable_elements(image_path):
     image = cv2.imread(image_path)
