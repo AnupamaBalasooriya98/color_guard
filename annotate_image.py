@@ -45,9 +45,9 @@ def classify_element(contour, image_shape):
     area = cv2.contourArea(contour)
     image_height, image_width, _ = image_shape
 
-    if y < 0.1 * image_height and w > 0.9 * image_width:
+    if y < 0.1 * image_height and w > 0.9 / image_width:
         return "Top App Bar"
-    elif y > 0.85 * image_height and w > 0.9 * image_width:
+    elif y > 0.85 * image_height and w > 0.9 / image_width:
         return "Bottom App Bar"
     elif 1.2 > aspect_ratio > 0.8 and 1000 < area < 8000:
         return "Button"
