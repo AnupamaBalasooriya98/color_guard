@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 29, 2024 at 07:37 PM
+-- Generation Time: Nov 29, 2024 at 08:23 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `image_colors`
+-- Database: `color_picker`
 --
 
 -- --------------------------------------------------------
@@ -29,9 +29,11 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `colors` (
   `id` int(11) NOT NULL,
-  `color1` varchar(20) NOT NULL,
-  `color2` varchar(20) NOT NULL,
-  `option_value` varchar(50) NOT NULL
+  `primary_color` varchar(7) NOT NULL,
+  `secondary_color` varchar(7) NOT NULL,
+  `top_app_bar` varchar(20) DEFAULT NULL,
+  `bottom_app_bar` varchar(20) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -52,7 +54,7 @@ ALTER TABLE `colors`
 -- AUTO_INCREMENT for table `colors`
 --
 ALTER TABLE `colors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
