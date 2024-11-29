@@ -1,9 +1,10 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
-    if (isset($data['color1']) && isset($data['color2'])) {
+    if (isset($data['color1']) && isset($data['color2']) && isset($data['option'])) {
         $color1 = $data['color1'];
         $color2 = $data['color2'];
+        $option = $data['option'];
 
         // Database connection
         $host = 'localhost';
@@ -17,25 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             die("Connection failed: " . $conn->connect_error);
         }
 
-        // Check if a record already exists
-        $query = "SELECT id FROM colors ORDER BY id DESC LIMIT 1";
-        $result = $conn->query($query);
-
-        if ($result->num_rows > 0) {
-            // Update the latest record
-            $row = $result->fetch_assoc();
-            $stmt = $conn->prepare("UPDATE colors SET color1 = ?, color2 = ? WHERE id = ?");
-            $stmt->bind_param("ssi", $color1, $color2, $row['id']);
-        } else {
-            // Insert new record
-            $stmt = $conn->prepare("INSERT INTO colors (color1, color2) VALUES (?, ?)");
-            $stmt->bind_param("ss", $color1, $color2);
-        }
+        // Insert the record into the database
+        $stmt = $conn->prepare("INSERT INTO colors (color1, color2, option_value) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $color1, $color2, $option);
 
         if ($stmt->execute()) {
-            echo "Colors saved or updated successfully!";
+            echo "Colors and option saved successfully!";
         } else {
-            echo "Failed to save or update colors.";
+            echo "Failed to save colors and option.";
         }
 
         $stmt->close();
