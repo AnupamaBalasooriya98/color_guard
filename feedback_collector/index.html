@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Color Picker</title>
+    <style>
+        .color-rect {
+            width: 100px;
+            height: 100px;
+            border: 2px solid black;
+            margin: 10px;
+            cursor: pointer;
+            display: inline-block;
+        }
+        #colorControls {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        #message {
+            margin-top: 10px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>Interactive Color Picker</h1>
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="upload.php">
+        <label for="image">Upload an Image:</label>
+        <input type="file" name="image" id="image" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <div id="imageSection" style="display: none; margin-top: 20px;">
+        <h2>Click on a rectangle and pick a color from the image</h2>
+        <canvas id="imageCanvas"></canvas>
+        <div id="colorControls">
+            <div id="colorRect1" class="color-rect" data-rect="1">Color 1</div>
+            <div id="colorRect2" class="color-rect" data-rect="2">Color 2</div>
+        </div>
+        <button id="saveColors" style="margin-top: 10px;">Save Colors</button>
+        <p id="message"></p>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('image');
+        const imageCanvas = document.getElementById('imageCanvas');
+        const colorRect1 = document.getElementById('colorRect1');
+        const colorRect2 = document.getElementById('colorRect2');
+        const saveColorsButton = document.getElementById('saveColors');
+        const imageSection = document.getElementById('imageSection');
+        const message = document.getElementById('message');
+
+        let activeRect = null;
+        const selectedColors = { 1: null, 2: null }; // To store selected colors for both rectangles
+
+        // Display the uploaded image on the canvas
+        imageInput.addEventListener('change', function () {
+            const file = imageInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function () {
+                        const ctx = imageCanvas.getContext('2d');
+                        imageCanvas.width = img.width;
+                        imageCanvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        imageSection.style.display = 'block';
+                        message.textContent = "Image uploaded successfully. Select a rectangle to pick colors.";
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle rectangle click to activate color selection
+        [colorRect1, colorRect2].forEach(rect => {
+            rect.addEventListener('click', function () {
+                activeRect = this.dataset.rect;
+                message.textContent = `Now selecting color for Rectangle ${activeRect}. Click on the image to pick a color.`;
+            });
+        });
+
+        // Detect the color where the user clicks and assign it to the active rectangle
+        imageCanvas.addEventListener('click', function (event) {
+            if (!activeRect) {
+                message.textContent = "Please select a rectangle before picking a color.";
+                return;
+            }
+
+            const rect = imageCanvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const ctx = imageCanvas.getContext('2d');
+            const imageData = ctx.getImageData(x, y, 1, 1).data;
+            const rgb = `rgb(${imageData[0]}, ${imageData[1]}, ${imageData[2]})`;
+
+            selectedColors[activeRect] = rgb;
+
+            // Update the rectangle background color
+            if (activeRect === "1") {
+                colorRect1.style.backgroundColor = rgb;
+            } else if (activeRect === "2") {
+                colorRect2.style.backgroundColor = rgb;
+            }
+
+            message.textContent = `Color for Rectangle ${activeRect} set to ${rgb}.`;
+        });
+
+        // Save the selected colors
+        saveColorsButton.addEventListener('click', function () {
+            if (!selectedColors[1] || !selectedColors[2]) {
+                message.textContent = "Please select colors for both rectangles before saving.";
+                return;
+            }
+
+            fetch('save_color.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ color1: selectedColors[1], color2: selectedColors[2] })
+            })
+                .then(response => response.text())
+                .then(data => {
+                    message.textContent = data;
+                });
+        });
+    </script>
+</body>
+</html>
