@@ -1,46 +1,51 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Decode the JSON payload sent from the JavaScript
-    $data = json_decode(file_get_contents('php://input'), true);
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "color_picker"; // Replace with your DB name
 
-    // Check for required color fields in the received data
-    if (isset($data['primary']) && isset($data['secondary'])) {
-        $primaryColor = $data['primary'];
-        $secondaryColor = $data['secondary'];
-        $topAppBar = $data['top_app_bar'] ?? null;
-        $bottomAppBar = $data['bottom_app_bar'] ?? null;
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-        // Database connection settings
-        $host = 'localhost';
-        $db = 'color_picker';
-        $user = 'root';
-        $pass = '';
-
-        // Establish database connection
-        $conn = new mysqli($host, $user, $pass, $db);
-
-        // Check connection
-        if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-        }
-
-        // Prepare and execute the SQL query
-        $stmt = $conn->prepare("INSERT INTO colors (primary_color, secondary_color, top_app_bar, bottom_app_bar) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $primaryColor, $secondaryColor, $topAppBar, $bottomAppBar);
-
-        if ($stmt->execute()) {
-            echo "Colors saved successfully!";
-        } else {
-            echo "Failed to save colors: " . $stmt->error;
-        }
-
-        // Close the statement and connection
-        $stmt->close();
-        $conn->close();
-    } else {
-        echo "Invalid data. Both primary and secondary colors are required.";
-    }
-} else {
-    echo "Invalid request method.";
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Handle image upload
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        $imageName = basename($_FILES['image']['name']);
+        $targetDir = "uploads/";
+        $targetFile = $targetDir . $imageName;
+
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
+            // Save image info to database
+            $stmt = $conn->prepare("INSERT INTO images (name, path) VALUES (?, ?)");
+            $stmt->bind_param("ss", $imageName, $targetFile);
+            $stmt->execute();
+            $imageId = $conn->insert_id;
+        } else {
+            die("Image upload failed.");
+        }
+    } else {
+        die("No image uploaded.");
+    }
+
+    // Handle UI element and color data
+    $uiElements = $_POST['uiElement'];
+    $colors = $_POST['color'];
+    $customColors = $_POST['customColor'];
+
+    foreach ($uiElements as $index => $element) {
+        $color = $colors[$index] === "Other" ? $customColors[$index] : $colors[$index];
+        $stmt = $conn->prepare("INSERT INTO ui_colors (image_id, ui_element, color) VALUES (?, ?, ?)");
+        $stmt->bind_param("iss", $imageId, $element, $color);
+        $stmt->execute();
+    }
+
+    echo "Data saved successfully with Image ID: $imageId";
+}
+
+$conn->close();
 ?>

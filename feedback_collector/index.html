@@ -4,197 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <title>Interactive Color Picker with Dropdown</title>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <title>Dynamic UI Element Selector with Image Upload</title>
     <style>
-        .color-rect {
-            width: 100px;
-            height: 100px;
-            cursor: pointer;
-            border: 2px solid black;
+        .color-picker {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">Color Picker App</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">Home</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
     <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-6">
-                <h2>Uploaded Image</h2>
-                <canvas id="imageCanvas"></canvas>
+        <h2>Upload Image and Select UI Elements</h2>
+        <form id="uiForm" enctype="multipart/form-data">
+            <!-- Image Upload Section -->
+            <div class="form-group">
+                <label for="imageUpload">Upload Image</label>
+                <input type="file" class="form-control" id="imageUpload" name="image" accept="image/*" required>
             </div>
-            <div class="col-md-6">
-                <h2>Pick Colors and Save</h2>
-                <form id="uploadForm" method="POST" enctype="multipart/form-data" action="upload.php">
-                    <div class="form-group">
-                        <label for="image">Upload an Image:</label>
-                        <input type="file" class="form-control-file" name="image" id="image" accept="image/*" required>
-                    </div>
-                </form>
-                <div id="colorControls" class="d-flex align-items-center mt-3">
-                    <label for="primary_color" class="mr-3">Primary color:</label>
-                    <div id="primary_color" class="color-rect"></div>
-                    <label for="secondary_color" class="ml-3 mr-3">Secondary color:</label>
-                    <div id="secondary_color" class="color-rect"></div>
-                </div>
-                <div id="dropdown" class="mt-3">
-                    <div class="form-group">
-                        <label for="selection1">Top app bar color:</label>
-                        <select class="form-control" id="selection1">
-                            <option>Primary Color</option>
-                            <option>Secondary Color</option>
-                            <option>Other</option>
+
+            <div id="dropdownContainer">
+                <!-- Dropdown Section -->
+                <div class="form-row dropdown-set">
+                    <div class="form-group col-md-5">
+                        <label for="uiElement">UI Element</label>
+                        <select class="form-control ui-element" name="uiElement[]">
+                            <option value="Button">Button</option>
+                            <option value="Radio Button">Radio Button</option>
+                            <option value="Checkbox">Checkbox</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label for="selection2">Bottom app bar color:</label>
-                        <select class="form-control" id="selection2">
-                            <option>Primary Color</option>
-                            <option>Secondary Color</option>
-                            <option>Other</option>
+                    <div class="form-group col-md-5">
+                        <label for="color">Color</label>
+                        <select class="form-control color-selector" name="color[]">
+                            <option value="Primary">Primary</option>
+                            <option value="Secondary">Secondary</option>
+                            <option value="Other">Other</option>
                         </select>
+                        <input type="color" class="form-control mt-2 color-picker" name="customColor[]" />
+                    </div>
+                    <div class="form-group col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-danger remove-btn">Remove</button>
                     </div>
                 </div>
-                <button id="saveColors" class="btn btn-primary mt-3">Save Colors</button>
-                <div id="message" class="alert alert-success mt-3" role="alert" style="display: none;"></div>
             </div>
-        </div>
+
+            <button type="button" id="addDropdown" class="btn btn-primary mt-3">Add More</button>
+            <button type="submit" class="btn btn-success mt-3">Save</button>
+        </form>
+        <div id="message" class="mt-3"></div>
     </div>
+
     <script>
-        const imageInput = document.getElementById('image');
-        const imageCanvas = document.getElementById('imageCanvas');
-        const primaryColorRect = document.getElementById('primary_color');
-        const secondaryColorRect = document.getElementById('secondary_color');
-        const saveColorsButton = document.getElementById('saveColors');
-        const message = document.getElementById('message');
-
-        let activeRect = null;
-        const selectedColors = { primary: null, secondary: null };
-
-        function rgbToHex(r, g, b) {
-            return (
-                "#" +
-                [r, g, b].map(x => x.toString(16).padStart(2, "0").toUpperCase()).join("")
-            );
-        }
-
-        imageInput.addEventListener('change', function () {
-            const file = imageInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = function () {
-                        const ctx = imageCanvas.getContext('2d');
-
-                        // Set desired canvas dimensions
-                        const canvasWidth = 500; // Example width
-                        const canvasHeight = 700; // Example height
-                        imageCanvas.width = canvasWidth;
-                        imageCanvas.height = canvasHeight;
-
-                        // Calculate aspect ratio and resizing
-                        const imgAspectRatio = img.width / img.height;
-                        const canvasAspectRatio = canvasWidth / canvasHeight;
-
-                        let drawWidth, drawHeight, offsetX, offsetY;
-
-                        if (imgAspectRatio > canvasAspectRatio) {
-                            // Image is wider than canvas
-                            drawWidth = canvasWidth;
-                            drawHeight = canvasWidth / imgAspectRatio;
-                            offsetX = 0;
-                            offsetY = (canvasHeight - drawHeight) / 2;
-                        } else {
-                            // Image is taller than canvas
-                            drawHeight = canvasHeight;
-                            drawWidth = canvasHeight * imgAspectRatio;
-                            offsetX = (canvasWidth - drawWidth) / 2;
-                            offsetY = 0;
-                        }
-
-                        // Clear the canvas and draw the image
-                        ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-                        ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
-
-                        message.textContent = "Image uploaded and resized successfully. Select a rectangle to pick colors.";
-                        message.style.display = "block";
-                    };
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        [primaryColorRect, secondaryColorRect].forEach(rect => {
-            rect.addEventListener('click', function () {
-                activeRect = this.id === "primary_color" ? 'primary' : 'secondary';
-                message.textContent = `Select a color for the ${activeRect} rectangle.`;
-                message.style.display = 'block';
+        $(document).ready(function () {
+            // Add more dropdown sets dynamically
+            $('#addDropdown').click(function () {
+                $('#dropdownContainer').append(`
+                    <div class="form-row dropdown-set">
+                        <div class="form-group col-md-5">
+                            <label for="uiElement">UI Element</label>
+                            <select class="form-control ui-element" name="uiElement[]">
+                                <option value="Button">Button</option>
+                                <option value="Radio Button">Radio Button</option>
+                                <option value="Checkbox">Checkbox</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-5">
+                            <label for="color">Color</label>
+                            <select class="form-control color-selector" name="color[]">
+                                <option value="Primary">Primary</option>
+                                <option value="Secondary">Secondary</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <input type="color" class="form-control mt-2 color-picker" name="customColor[]" />
+                        </div>
+                        <div class="form-group col-md-2 d-flex align-items-end">
+                            <button type="button" class="btn btn-danger remove-btn">Remove</button>
+                        </div>
+                    </div>
+                `);
             });
-        });
 
-        imageCanvas.addEventListener('click', function (event) {
-            if (!activeRect) {
-                message.textContent = "Select a rectangle before picking a color.";
-                message.style.display = 'block';
-                return;
-            }
+            // Show or hide color picker based on selection
+            $(document).on('change', '.color-selector', function () {
+                const colorPicker = $(this).siblings('.color-picker');
+                if ($(this).val() === 'Other') {
+                    colorPicker.show();
+                } else {
+                    colorPicker.hide();
+                }
+            });
 
-            const rect = imageCanvas.getBoundingClientRect();
-            const scaleX = imageCanvas.width / rect.width;
-            const scaleY = imageCanvas.height / rect.height;
-            const x = Math.floor((event.clientX - rect.left) * scaleX);
-            const y = Math.floor((event.clientY - rect.top) * scaleY);
+            // Remove a dropdown set
+            $(document).on('click', '.remove-btn', function () {
+                $(this).closest('.dropdown-set').remove();
+            });
 
-            const ctx = imageCanvas.getContext('2d');
-            const imageData = ctx.getImageData(x, y, 1, 1).data;
-            const hex = rgbToHex(imageData[0], imageData[1], imageData[2]);
-
-            selectedColors[activeRect] = hex;
-
-            const rectToStyle = activeRect === 'primary' ? primaryColorRect : secondaryColorRect;
-            rectToStyle.style.backgroundColor = hex;
-
-            message.textContent = `Color for ${activeRect} rectangle set to ${hex}.`;
-            message.style.display = 'block';
-        });
-
-        saveColorsButton.addEventListener('click', function () {
-            if (!selectedColors.primary || !selectedColors.secondary) {
-                message.textContent = "Set colors for both rectangles before saving.";
-                message.style.display = 'block';
-                return;
-            }
-
-            fetch('save_color.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    primary: selectedColors.primary,
-                    secondary: selectedColors.secondary,
-                    top_app_bar: document.getElementById('selection1').value,
-                    bottom_app_bar: document.getElementById('selection2').value
-                })
-            })
-            .then(response => response.text())
-            .then(data => {
-                message.textContent = data;
-                message.style.display = 'block';
+            // Submit the form
+            $('#uiForm').submit(function (e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                $.ajax({
+                    url: 'save_color.php',
+                    method: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        $('#message').html(`<div class="alert alert-success">${response}</div>`);
+                    },
+                });
             });
         });
     </script>
