@@ -173,6 +173,12 @@
             `);
         });
 
+        // Add this for dynamically generated elements
+        $(document).on('click', '.remove-btn', function () {
+            $(this).closest('.dropdown-set').remove();
+        });
+
+
         // Show Color Picker for "Other"
         $(document).on('change', '.color-selector', function () {
             const colorPicker = $(this).siblings('.color-picker');
