@@ -13,23 +13,28 @@
             border: 1px solid #000;
             vertical-align: middle;
         }
+
         .color-container {
             margin-bottom: 20px;
         }
+
         .element-container {
             margin-bottom: 20px;
             display: flex;
             align-items: center;
         }
+
         .element-container img {
             width: 100px;
             height: auto;
             margin-right: 10px;
         }
+
         .element-details {
             display: inline-block;
             vertical-align: top;
         }
+
         .annotated-image {
             max-width: 80%;
             height: auto;
