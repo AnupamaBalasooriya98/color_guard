@@ -6,6 +6,7 @@ import tempfile
 import cv2
 from colorthief import ColorThief
 import webcolors
+from PIL import Image
 
 # Convert RGB tuple to hexadecimal color
 def rgb_to_hex(color):
@@ -13,7 +14,7 @@ def rgb_to_hex(color):
 
 def find_primary_and_secondary_colors(image_path):
     ct = ColorThief(image_path)
-    palette = ct.get_palette(color_count = 2)
+    palette = ct.get_palette(color_count = 2, quality = 1)
     return palette[0], palette[1]
 
 def dominant_color_of_element(cropped_image):
@@ -30,7 +31,7 @@ def dominant_color_of_element(cropped_image):
 
         try:
             ct = ColorThief(temp_filename)
-            palette = ct.get_palette(color_count = 2)
+            palette = ct.get_palette(color_count = 2, quality = 1)
             return palette[0]
         except Exception as e:
             print(f"Error extracting color: {e}")
@@ -131,7 +132,11 @@ def detect_clickable_elements(image_path):
 def main():
     image_path = sys.argv[1]
 
-    primary_color, secondary_color = find_primary_and_secondary_colors(image_path)
+    im = Image.open(image_path)
+    im = im.crop((0, 60, 1080, 1795))
+    im.save('_0.png')
+
+    primary_color, secondary_color = find_primary_and_secondary_colors('_0.png')
     print(rgb_to_hex(primary_color) if primary_color else "N/A")
     print(rgb_to_hex(secondary_color) if secondary_color else "N/A")
 
