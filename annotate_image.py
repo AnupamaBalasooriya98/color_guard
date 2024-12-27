@@ -140,9 +140,9 @@ def main():
 
     im = Image.open(image_path)
     im = im.crop((0, 60, 1080, 1795))
-    im.save('_0.png')
+    im.save('uploads/_0.png')
 
-    primary_color, secondary_color = find_primary_and_secondary_colors('_0.png')
+    primary_color, secondary_color = find_primary_and_secondary_colors('uploads/_0.png')
     print(rgb_to_hex(primary_color) if primary_color else "N/A")
     print(rgb_to_hex(secondary_color) if secondary_color else "N/A")
 
