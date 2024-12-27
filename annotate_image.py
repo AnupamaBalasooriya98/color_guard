@@ -79,6 +79,9 @@ def get_closest_color_name(requested_color):
     return min_colors[min(min_colors.keys())]
 
 def detect_clickable_elements(image_path):
+    def is_within_app_bar(y, h, image_height, top_bar_height, bottom_bar_height):
+        return (y < top_bar_height) or (y + h > image_height - bottom_bar_height)
+    
     image = cv2.imread(image_path)
     if image is None:
         raise ValueError(f"Image not found or unable to load: {image_path}")
@@ -95,12 +98,15 @@ def detect_clickable_elements(image_path):
     contours, _ = cv2.findContours(morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     annotated_image = image.copy()
     element_data = []
+    image_height, image_width = annotated_image.shape[:2]
+    top_bar_height = int(0.05 * image_height)
+    bottom_bar_height = int(0.05 * image_height)
 
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
         area = cv2.contourArea(contour)
 
-        if area > 500:
+        if area > 500 and not is_within_app_bar(y, h, image_height, top_bar_height, bottom_bar_height):
             element_type = classify_element(contour, annotated_image.shape)
             cv2.rectangle(annotated_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
             cv2.putText(annotated_image, element_type, (x, y - 10),
